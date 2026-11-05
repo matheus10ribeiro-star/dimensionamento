@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000464">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="img/icone-192.png">
+<link rel="apple-touch-icon" href="img/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dimensionamento">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head><body>
+<title>Dimensionamento Grupo A</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: ferramenta em duas colunas — nota (entrada) à esquerda, dimensionamento (saída) à direita; uma coluna no celular */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#16202e; --muted:#5b6778; --line:#d8dee7;
+  --accent:#1d55b4; --accent-ink:#ffffff; --accent-soft:#e6eefb;
+  --ok:#1f7a4a; --warn:#a2610b; --warn-soft:#fbf1e1;
+  --brand:#000464;
+  --f-ui:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151d; --surface:#18202b; --ink:#e4e9f0; --muted:#97a3b4; --line:#2b3644;
+  --accent:#6f9cf0; --accent-ink:#0d1420; --accent-soft:#1c2a42;
+  --ok:#5cc28d; --warn:#e3a44a; --warn-soft:#2f2615; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151d; --surface:#18202b; --ink:#e4e9f0; --muted:#97a3b4; --line:#2b3644;
+  --accent:#6f9cf0; --accent-ink:#0d1420; --accent-soft:#1c2a42;
+  --ok:#5cc28d; --warn:#e3a44a; --warn-soft:#2f2615; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.brandbar{background:var(--brand);color:#fff;box-shadow:0 2px 10px rgba(0,4,100,.25)}
+.brandin{max-width:1180px;margin:0 auto;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:16px}
+.blogo{height:40px;width:auto;display:block;flex:none}
+.bsep{width:1px;height:34px;background:rgba(255,255,255,.35);flex:none}
+.btit{display:flex;flex-direction:column;min-width:0}
+.btit b{font-size:17px;line-height:1.2}
+.btit span{font-size:12.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.blogo{height:28px}.bsep{height:26px}.btit b{font-size:15px}}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;display:grid;gap:4px;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop strong{font-size:15px}
+.drop span{color:var(--muted);font-size:13px}
+.status{font-size:13px;color:var(--muted)}
+.status.err{color:var(--warn)}
+.status.ok{color:var(--ok)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.fields .full{grid-column:1/-1}
+label{display:grid;gap:3px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+input,select,textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;box-sizing:border-box;min-width:0}
+textarea{font-family:var(--f-mono);font-size:12.5px;line-height:1.45;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.calc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+@media (max-width:560px){.calc{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.calc div{background:var(--surface);padding:10px 12px;display:grid;gap:2px}
+.calc small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.calc b{font-family:var(--f-mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.calc em{font-style:normal;color:var(--muted);font-size:12px}
+.memo{font-family:var(--f-mono);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;white-space:pre-wrap;overflow-x:auto}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.q{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+th.q{text-align:right}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;font-weight:600;border-radius:6px;padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+details summary{padding:12px 16px;cursor:pointer;font-weight:600}
+details .inner{padding:0 16px 16px;display:grid;gap:12px}
+.hint{font-size:12px;color:var(--muted);margin:0}
+a.lk{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--surface)}
+a.lk:hover{background:var(--accent-soft)}
+a.lk[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.lkrow{display:flex;flex-wrap:wrap;gap:8px}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 12px;font-size:13px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ph{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:grid;grid-template-rows:auto auto;background:var(--bg);min-width:0}
+.ph .img{aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;background:var(--surface);color:var(--muted);font-size:12px;text-align:center;padding:0 8px}
+.ph .img img{width:100%;height:100%;object-fit:contain}
+.ph .cap{padding:8px 10px;display:grid;gap:6px}
+.ph .cap b{font-size:12.5px}
+.ph .row{display:flex;gap:6px;flex-wrap:wrap}
+.ph button{padding:5px 10px;font-size:12px}
+.ph.busy{opacity:.6}
+td.th{width:64px}
+td.th img{width:56px;height:42px;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:var(--surface);display:block}
+/* ---------- celular: só abaixo de 640px; o PC não muda ---------- */
+@media (max-width:640px){
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .wrap{padding-block:14px 24px;gap:14px}
+  h1{font-size:19px}
+  .sub{font-size:13px}
+  .panel{padding:14px;border-radius:10px}
+  .fields{grid-template-columns:minmax(0,1fr)}
+  input,select{font-size:16px;min-height:44px}
+  textarea{font-size:16px}
+  button{min-height:44px}
+  .drop{padding:22px 14px}
+  .drop strong{font-size:16px}
+  a.lk{flex:1 1 100%;justify-content:center;min-height:44px;font-size:14px}
+  .pdfbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(0,0,0,.12);
+    padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:6px}
+  .pdfbar button{flex:1 1 100%}
+  .pdfbar .status:empty{display:none}
+  .pdfbar .status{flex-basis:100%;text-align:center}
+  table.eq thead{display:none}
+  table.eq tr{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:4px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  table.eq td{border:0;padding:0}
+  table.eq td.th{grid-column:1;grid-row:1/3}
+  table.eq td:nth-child(2){grid-column:2;grid-row:1}
+  table.eq td.q{grid-column:3;grid-row:1}
+  table.eq td:nth-child(3){grid-column:2/4;grid-row:2;font-size:12.5px;color:var(--muted)}
+  .photos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  details summary{padding:14px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="brandbar"><div class="brandin"><img class="blogo" src="img/logo.png" alt="Equatorial Energia"><span class="bsep" aria-hidden="true"></span><div class="btit"><b>Dimensionamento de medição</b><span>Grupo A · Executiva de Perdas Sul e Sudoeste</span></div></div></div>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Ligação nova e reativação de UC</h1>
+      <p class="sub">Envie a nota (PDF) de ligação nova ou de reativação de UC. A página lê os dados, define TC, TP, medidor, chave de aferição e materiais, e gera o PDF.</p>
+    </div>
+    <span class="badge" id="exBadge">Exemplo com dados fictícios</span>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="h-nota">
+      <div class="actions" style="justify-content:space-between">
+        <h2 id="h-nota">Nota de serviço</h2>
+        <button id="btnNova" type="button">Nova nota</button>
+      </div>
+      <label class="drop" id="drop" for="file">
+        <strong>Arraste o PDF da nota aqui</strong>
+        <span>ou toque para escolher o arquivo</span>
+        <input type="file" id="file" accept="application/pdf" hidden>
+      </label>
+      <div class="status" id="status">Leitura automática dos campos da nota. Confira e ajuste antes de gerar.</div>
+      <div id="exist" hidden style="display:grid;gap:8px"><h2>Medição existente na nota</h2><p class="hint">Dados de medição que a nota já traz (comum em reativação). Confira em campo se o equipamento existente pode ser reaproveitado.</p><div class="tbl"><table><tbody id="tExist"></tbody></table></div></div>
+
+      <div class="fields">
+        <label>SS<input id="f_ss" class="mono"></label>
+        <label>Data solicitação<input id="f_data" class="mono"></label>
+        <label class="full">Tipo de serviço<select id="f_tiposerv"><option value="nova">Ligação nova</option><option value="reativ">Reativação de UC</option></select></label>
+        <label class="full">Serviço<input id="f_servico"></label>
+        <label class="full">Cliente<input id="f_cliente"></label>
+        <label class="full">Endereço<input id="f_endereco"></label>
+        <label>Localidade<input id="f_localidade"></label>
+        <label>Telefone<input id="f_telefone" class="mono"></label>
+        <label>Latitude<input id="f_lat" class="mono" inputmode="decimal" placeholder="ex.: -16.516000"></label>
+        <label>Longitude<input id="f_lon" class="mono" inputmode="decimal" placeholder="ex.: -49.937000"></label>
+        <div class="full lkrow"><a class="lk" id="lnkMaps" target="_blank" rel="noopener">Abrir no Google Maps</a><a class="lk" id="lnkCob" target="_blank" rel="noopener">Verificar sinal no local</a></div>
+        <label class="full">Classe / subclasse<input id="f_classe"></label>
+        <label class="full">Atividade<input id="f_atividade"></label>
+        <label>Tipo de ligação<input id="f_tipolig"></label>
+        <label>Ramal<input id="f_ramal"></label>
+        <label>Pot. trafo (kVA)<input id="f_kva" class="mono" inputmode="decimal"></label>
+        <label>Tensão forn. (código da nota)<input id="f_tforn" class="mono"></label>
+        <label>Tensão primária (kV)
+          <select id="f_kv"><option value="13.8">13,8 kV</option><option value="34.5">34,5 kV</option><option value="22">22 kV</option></select>
+        </label>
+        <label>Tensão secundária (V)
+          <select id="f_vsec"><option value="380">380/220 V</option><option value="220">220/127 V</option><option value="440">440/254 V</option></select>
+        </label>
+        <label>Perfil do cliente
+          <select id="f_perfil">
+            <option value="irrigante">Irrigante</option>
+            <option value="industria">Indústria</option>
+          </select>
+        </label>
+        <label>Ponto de medição
+          <select id="f_ponto"><option value="auto">Automático pela potência</option><option value="BT">Forçar BT</option><option value="MT">Forçar MT</option></select>
+        </label>
+        <label>Instalação em MT
+          <select id="f_inst"><option value="h">Estrutura H (uso externo)</option><option value="cub">Cubículo de medição GD (uso interno)</option><option value="blindada">Medição blindada (conjunto TC + TP)</option></select>
+        </label>
+        <label class="full">Remota de telemetria<select id="f_remota"><option value="MAX">RS2000 Lite DS 4G Max (celular 4G/3G/2G)</option><option value="CATM">RS2000 Lite NB Cat-M (IoT Cat-M/NB-IoT + 2G)</option><option value="ETH">RS2000 Ultra Lite Ethernet (satélite / rede local)</option></select></label>
+        <label class="full">Responsável<input id="f_resp" value="Matheus Ribeiro dos Santos Paiva"></label>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-res">
+      <div class="actions" style="justify-content:space-between">
+        <h2 id="h-res">Dimensionamento</h2>
+        <span class="badge" id="pontoBadge">Medição em BT</span>
+      </div>
+      <div class="calc" id="calc"></div>
+      <div class="memo" id="memo"></div>
+      <div id="warns" style="display:grid;gap:8px"></div>
+
+      <h2>Equipamentos de medição</h2>
+      <div class="tbl"><table class="eq"><thead><tr><th>Foto</th><th>Item</th><th>Especificação</th><th class="q">Qtd</th></tr></thead><tbody id="tEquip"></tbody></table></div>
+
+      <h2>Materiais complementares</h2>
+      <div class="tbl"><table><thead><tr><th>Material</th><th class="q">Qtd</th><th>Un</th></tr></thead><tbody id="tMat"></tbody></table></div>
+
+      <label>Observações para o PDF<textarea id="f_obs" rows="3"></textarea></label>
+
+      <div class="actions pdfbar">
+        <button class="primary" id="btnPdf">Baixar PDF do dimensionamento</button>
+        <span class="status" id="pdfStatus"></span>
+      </div>
+    </section>
+  </div>
+
+  <details id="fotos" open>
+    <summary>Fotos dos equipamentos</summary>
+    <div class="inner">
+      <p class="hint" id="phHint">Cadastre uma vez a foto de cada equipamento que vocês usam. Ela aparece na tabela e entra no PDF de toda ligação que usar o item.</p>
+      <div class="photos" id="phGrid"></div>
+      <input type="file" id="phFile" accept="image/*" hidden>
+    </div>
+  </details>
+
+  <details id="cfg">
+    <summary>Padrões de dimensionamento (ajuste conforme a norma da distribuidora)</summary>
+    <div class="inner">
+      <p class="hint">Estes valores ficam salvos neste navegador. Os padrões iniciais seguem a prática comum de medição indireta; confira com a norma técnica vigente da Equatorial Goiás.</p>
+      <div class="fields">
+        <label>Limite para medição em BT (kVA, inclusive)<input id="c_limite" class="mono" inputmode="decimal"></label>
+        <label>Fator sobre a corrente nominal<input id="c_fator" class="mono" inputmode="decimal"></label>
+        <label class="full">Relações de TC janela em BT (primário, A; secundário 5 A)<input id="c_tcbt" class="mono"></label>
+        <label class="full">Relações de TC de MT (primário, A; secundário 5 A)<input id="c_tcmt" class="mono"></label>
+        <label class="full">Especificação do TC de BT<input id="c_spec_tcbt"></label>
+        <label class="full">TC de MT · estrutura H (externo)<input id="c_spec_tcmt_h"></label>
+        <label class="full">TP · estrutura H (externo)<input id="c_spec_tp_h"></label>
+        <label class="full">TC de MT · cubículo GD (interno)<input id="c_spec_tcmt_cub"></label>
+        <label class="full">TP · cubículo GD (interno)<input id="c_spec_tp_cub"></label>
+        <label class="full">Conjunto de medição blindada<input id="c_spec_blindada"></label>
+        <label class="full">Chave de aferição<input id="c_chave"></label>
+        <label class="full">Medidor · irrigante<textarea id="c_med_irrigante" rows="2"></textarea></label>
+        <label class="full">Medidor · indústria<textarea id="c_med_industria" rows="2"></textarea></label>
+        <label class="full">Mapa de cobertura (endereço aberto pelo botão "Verificar sinal no local")<input id="c_cob_url" class="mono"></label>
+        <label class="full">Materiais · medição em BT (uma linha por item: descrição ; qtd ; un)<textarea id="c_mat_bt" rows="8"></textarea></label>
+        <label class="full">Materiais · medição em MT (descrição ; qtd ; un)<textarea id="c_mat_mt" rows="8"></textarea></label>
+      </div>
+      <div class="actions"><button id="btnReset">Restaurar padrões iniciais</button></div>
+    </div>
+  </details>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="padroes.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtKva=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
+
+/* ---------- padrões ---------- */
+
+const CFG_KEYS=Object.keys(DEFAULTS);
+function loadCfg(){let s={};try{s=JSON.parse(localStorage.getItem('dimGA_cfg')||'{}')}catch(e){}
+  if(s.c_tcbt&&/\b(50|75|100|150|300|600)\b/.test(s.c_tcbt))delete s.c_tcbt;
+  ['c_mat_bt','c_mat_mt'].forEach(k=>{if(s[k]&&/Remota \/ modem/.test(s[k]))s[k]=s[k].replace(/^.*Remota \/ modem.*$/m,'Antena externa celular com cabo (conector TNC) ; 1 ; un');});
+  if(s.c_cob_url&&!/^https:/.test(s.c_cob_url))delete s.c_cob_url;
+  CFG_KEYS.forEach(k=>{$(k).value=(s[k]!=null?s[k]:DEFAULTS[k])});}
+function saveCfg(){const o={};CFG_KEYS.forEach(k=>{if($(k).value!==DEFAULTS[k])o[k]=$(k).value});try{localStorage.setItem('dimGA_cfg',JSON.stringify(o))}catch(e){}}
+const num=v=>{const n=parseFloat(String(v).replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',', '.'));return isFinite(n)?n:NaN};
+const series=v=>String(v).split(/[;,\s]+/).map(Number).filter(n=>n>0).sort((a,b)=>a-b);
+
+/* ---------- exemplo: definido em padroes.js ---------- */
+
+
+/* ---------- leitura do PDF ---------- */
+const LABELS=['Serviço:','SS:','Rest. corte:','Prioridade:','Solicitante:','Data solic.:','Observação:','UC:','Medidor:','Cte.:','Sit.:','Cliente:','Localidade:','CEP:','Bairro:','Endereço:','Telefone:','Razão:','Rota:','Roteiro:','Localização:','Déb. UC:','Carga:','Data lig.:','Ult. alt.:','Atividade:','Tipo ligação:','Pot. trafo:','Tensão forn.:','Tensão Med:','Fases:','Classe:','Subclasse:','Subgrupo:','Est. tarifária:','HP difer.:','Hor. reserv.:','CER:','Sazonalidade:','Ramal ligação:','Tipo ramal lig.:','Posto trafo:','Contrato:','TC 1:','TC 2:','TC 3:','TCs:','TP 1:','TP 2:','TP 3:','TPs:','Med eletr.:','Ch. afer.:','Conj. med.:','Cte kWh:','Cte kW:'];
+const EXIST_LABELS=[['UC:','UC'],['Medidor:','Medidor'],['Med eletr.:','Medidor eletrônico'],['Cte kWh:','Constante kWh'],['Cte kW:','Constante kW'],['TC 1:','TC 1'],['TC 2:','TC 2'],['TC 3:','TC 3'],['TCs:','Relação TCs'],['TP 1:','TP 1'],['TP 2:','TP 2'],['TP 3:','TP 3'],['TPs:','Relação TPs'],['Ch. afer.:','Chave de aferição'],['Conj. med.:','Conjunto de medição']];
+let existente=[];
+function renderExist(){$('exist').hidden=!existente.length;$('tExist').innerHTML=existente.map(([k,v])=>'<tr><th style="width:40%">'+escH(k)+'</th><td class="mono">'+escH(v)+'</td></tr>').join('');}
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const LRE=new RegExp('('+LABELS.slice().sort((a,b)=>b.length-a.length).map(esc).join('|')+')','g');
+
+async function pdfLines(buf){
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const page=await pdf.getPage(1);
+  const tc=await page.getTextContent();
+  const rows=[];
+  tc.items.forEach(it=>{ if(!it.str||!it.str.trim())return;
+    const y=it.transform[5], x=it.transform[4];
+    let r=rows.find(r=>Math.abs(r.y-y)<3); if(!r){r={y,items:[]};rows.push(r)}
+    r.items.push({x,s:it.str}); });
+  rows.sort((a,b)=>b.y-a.y);
+  return rows.map(r=>r.items.sort((a,b)=>a.x-b.x).map(i=>i.s.trim()).join(' ').replace(/\s+/g,' ').trim());
+}
+function parseLines(lines){
+  const out={}; const per=[];
+  lines.forEach(line=>{
+    const segs=[]; let m; LRE.lastIndex=0; const hits=[];
+    while((m=LRE.exec(line))){hits.push({l:m[1],i:m.index,e:m.index+m[1].length})}
+    const lead=hits.length?line.slice(0,hits[0].i).trim():line.trim();
+    hits.forEach((h,k)=>{const end=k+1<hits.length?hits[k+1].i:line.length;segs.push({l:h.l,v:line.slice(h.e,end).trim()})});
+    per.push({lead,segs});
+  });
+  per.forEach((p,i)=>{
+    p.segs.forEach(s=>{ if(!(s.l in out)||(!out[s.l]&&s.v)) out[s.l]=s.v; });
+    // valor que quebrou para a linha seguinte (ex.: Classe, Endereço)
+    const nxt=per[i+1];
+    if(nxt&&nxt.lead){
+      const last=p.segs.find(s=>s.l==='Classe:'||s.l==='Endereço:'||s.l==='Cliente:'||s.l==='Atividade:');
+      if(last){ if(!out[last.l]) out[last.l]=nxt.lead; else if(last.l==='Classe:') out[last.l]+=' '+nxt.lead; nxt.lead=''; }
+    }
+  });
+  return out;
+}
+function applyParsed(o,lines){
+  const g=k=>(o[k]||'').trim();
+  const set=(id,v)=>{$(id).value=v||''};
+  set('f_ss',(g('SS:').match(/\d{6,}/)||[''])[0]);
+  set('f_data',(g('Data solic.:').match(/\d{2}\/\d{2}\/\d{4}/)||[''])[0]);
+  set('f_servico',g('Serviço:'));
+  set('f_cliente',g('Cliente:'));
+  set('f_endereco',[g('Endereço:'),g('Bairro:')].filter(Boolean).join(' – '));
+  set('f_localidade',g('Localidade:'));
+  set('f_telefone',g('Telefone:'));
+  set('f_classe',[g('Classe:'),g('Subclasse:')].filter(Boolean).join(' / '));
+  set('f_atividade',g('Atividade:'));
+  set('f_tipolig',g('Tipo ligação:'));
+  set('f_ramal',g('Ramal ligação:'));
+  const k=(g('Pot. trafo:').match(/[\d.,]+/)||[''])[0];
+  set('f_kva',k?fmtKva(num(k.replace(/\.(\d{1,2})$/,',$1'))):'');
+  set('f_tforn',g('Tensão forn.:'));
+  $('f_tiposerv').value=/REATIV|RELIG|RECONEX/i.test(g('Serviço:'))?'reativ':'nova';
+  existente=EXIST_LABELS.map(([l,n])=>[n,g(l)]).filter(([n,v])=>v&&!/^(Modelo:?|-|0)$/i.test(v));
+  renderExist();
+  $('f_perfil').value=guessPerfil([g('Serviço:'),g('Classe:'),g('Subclasse:'),g('Atividade:')].join(' '));
+  const cc=findCoords([g('Endereço:'),g('Localização:'),g('Bairro:')].join(' '))||findCoords((lines||[]).join(' '));
+  set('f_lat',cc?cc[0].toFixed(6):'');set('f_lon',cc?cc[1].toFixed(6):'');
+  return !!k;
+}
+function guessPerfil(t){t=t.toUpperCase();
+  if(/IRRIG/.test(t))return 'irrigante';
+  if(/INDUST/.test(t))return 'industria';
+  return 'industria';}
+
+async function handleFile(f){
+  if(!f)return;
+  const st=$('status'); st.className='status'; st.textContent='Lendo '+f.name+'…';
+  try{
+    if(typeof pdfjsLib==='undefined')throw new Error('leitor de PDF não carregou');
+    const lines=await pdfLines(await f.arrayBuffer());
+    if(!lines.length){st.className='status err';st.textContent='O PDF não tem texto selecionável (parece digitalizado). Preencha os campos manualmente.';return;}
+    const ok=applyParsed(parseLines(lines),lines);
+    $('exBadge').hidden=true;
+    st.className=ok?'status ok':'status err';
+    st.textContent=ok?'Nota lida: '+f.name+'. Confira os campos e o perfil do cliente.':'Nota lida, mas a potência do trafo não foi encontrada. Informe o kVA.';
+    render();
+  }catch(e){st.className='status err';st.textContent='Não consegui ler este PDF ('+e.message+'). Preencha os campos manualmente.';}
+}
+
+/* ---------- coordenadas e links ---------- */
+function findCoords(t){
+  if(!t)return null; t=String(t).replace(/\s+/g,' ');
+  const ok=(a,b)=>isFinite(a)&&isFinite(b)&&a>=-34&&a<=6&&b>=-75&&b<=-28;
+  const fix=(a,b)=>{ if(a>0&&b>0){a=-a;b=-b} else if(b>0)b=-b; return ok(a,b)?[a,b]:null; };
+  const D=/(\d{1,2})\s*[°º]\s*(\d{1,2})\s*['’′]\s*(\d{1,2}(?:[.,]\d+)?)?\s*(?:''|["”″])?\s*([NSns])?[^\d]{0,15}?(\d{1,3})\s*[°º]\s*(\d{1,2})\s*['’′]\s*(\d{1,2}(?:[.,]\d+)?)?\s*(?:''|["”″])?\s*([WOwoLlEe])?/;
+  const m=D.exec(t);
+  if(m){ const dd=(g,mi,s)=>+g + +mi/60 + (s?parseFloat(s.replace(',','.'))/3600:0);
+    let a=dd(m[1],m[2],m[3]), b=dd(m[5],m[6],m[7]); if(!m[4]||/s/i.test(m[4]))a=-a; if(!m[8]||/[wo]/i.test(m[8]))b=-b; if(ok(a,b))return [a,b]; }
+  const nums=(t.match(/-?\s?\d{1,3}[.,]\d{3,}/g)||[]).map(s=>parseFloat(s.replace(/\s/g,'').replace(',','.')));
+  for(let i=0;i+1<nums.length;i++){ const r=fix(nums[i],nums[i+1]); if(r)return r; }
+  return null;
+}
+function coords(){ const pf=v=>parseFloat(String(v).replace(/\s/g,'').replace(',','.')); const a=pf($('f_lat').value), b=pf($('f_lon').value); return (isFinite(a)&&isFinite(b)&&a>=-34&&a<=6&&b>=-75&&b<=-28)?[a,b]:null; }
+function covBase(){ const u=$('c_cob_url').value.trim()||COB_ARTIFACT; try{return new URL(u,location.href).href}catch(e){return u} }
+function mapsUrl(c){ return 'https://www.google.com/maps/search/?api=1&query='+c[0].toFixed(6)+','+c[1].toFixed(6); }
+function covHash(c){ const f=v=>{const p=Math.abs(v).toFixed(6).split('.');return p[0]+'p'+p[1]}; const ss=($('f_ss').value.match(/\d+/)||[''])[0];
+  return '#'+(ss?'ss'+ss+'-':'')+(c[0]<0?'S':'N')+f(c[0])+(c[1]<0?'W':'E')+f(c[1]); }
+function renderLinks(){ const c=coords(), a=$('lnkMaps'), b=$('lnkCob');
+  if(c){ a.href=mapsUrl(c); b.href=covBase()+covHash(c); a.removeAttribute('aria-disabled'); b.removeAttribute('aria-disabled'); a.title=''; b.title=''; }
+  else { a.removeAttribute('href'); b.removeAttribute('href'); a.setAttribute('aria-disabled','true'); b.setAttribute('aria-disabled','true'); a.title=b.title='Informe latitude e longitude'; } }
+
+/* ---------- cálculo ---------- */
+function classeIso(kv){return kv<=15?'15':kv<=24.2?'24,2':'36,2'}
+function pick(list,i){const s=list.find(v=>v>=i);return s?{v:s,over:false}:{v:list[list.length-1],over:true}}
+function calc(){
+  const kva=num($('f_kva').value), kv=num($('f_kv').value), vsec=num($('f_vsec').value);
+  const lim=num($('c_limite').value), fat=num($('c_fator').value)||1;
+  const forced=$('f_ponto').value;
+  const ponto=forced==='auto'?(kva<=lim?'BT':'MT'):forced;
+  const r={kva,kv,vsec,lim,fat,ponto,warns:[]};
+  if(!(kva>0)){r.invalid=true;return r}
+  r.inBT=kva*1000/(Math.sqrt(3)*vsec);
+  r.inMT=kva*1000/(Math.sqrt(3)*kv*1000);
+  if(ponto==='BT'){
+    const p=pick(series($('c_tcbt').value),r.inBT*fat); r.tc=p.v; if(p.over)r.warns.push('Corrente acima da maior relação de TC de BT cadastrada.');
+    r.rtc=r.tc/5; r.rtp=1; r.in=r.inBT;
+  }else{
+    const p=pick(series($('c_tcmt').value),r.inMT*fat); r.tc=p.v; if(p.over)r.warns.push('Corrente acima da maior relação de TC de MT cadastrada.');
+    r.rtc=r.tc/5; r.vp=Math.round(kv*1000); r.rtp=Math.round(r.vp/115); r.in=r.inMT;
+  }
+  r.fm=r.rtc*r.rtp; r.carga=r.in/r.tc*100;
+  if(r.carga<30)r.warns.push('Corrente nominal abaixo de 30% do primário do TC: a precisão em carga leve fica prejudicada. Avalie uma relação menor.');
+  if(forced!=='auto'&&forced!==(kva<=lim?'BT':'MT'))r.warns.push('Ponto de medição forçado manualmente, diferente da regra pelo limite de '+fmtKva(lim)+' kVA.');
+  return r;
+}
+function fill(t,r){return t.replace(/\{TC\}/g,r.tc).replace(/\{VP\}/g,(r.vp||0).toLocaleString('pt-BR')).replace(/\{CLASSE\}/g,classeIso(r.kv))}
+function equipamentos(r){
+  const perfil=$('f_perfil').value; const L=[];
+  if(r.ponto==='BT') L.push(['Transformador de corrente (TC) – RTC '+r.rtc,fill($('c_spec_tcbt').value,r),'3','tcbt_'+r.tc]);
+  else if($('f_inst').value==='blindada'){
+        L.push(['Conjunto de medição blindada – RTC '+r.rtc+' · RTP '+r.rtp,fill($('c_spec_blindada').value,r),'1','blindada']); }
+  else{ const ins=$('f_inst').value, nm=ins==='h'?'estrutura H':'cubículo GD', cl=r.kv<=15?'15':'36';
+        L.push(['Transformador de corrente (TC) – RTC '+r.rtc+' · '+nm,fill($('c_spec_tcmt_'+ins).value,r),'3','tcmt_'+ins+'_'+cl]);
+        L.push(['Transformador de potencial (TP) – RTP '+r.rtp+' · '+nm,fill($('c_spec_tp_'+ins).value,r),'3','tp_'+ins+'_'+cl]); }
+  L.push(['Medidor – '+$('f_perfil').selectedOptions[0].text,$('c_med_'+perfil).value.trim(),'1','med_'+perfil]);
+  L.push(['Chave de aferição',$('c_chave').value.trim(),'1','chave']);
+  const rk=$('f_remota').value, R=REMS[rk];
+  L.push(['Remota de telemetria – '+R.n,R.spec+' · cód. CAS '+R.cod,'1','rem_'+rk]);
+  return L;
+}
+function materiais(r){
+  let L=$(r.ponto==='BT'?'c_mat_bt':'c_mat_mt').value.split('\n').map(l=>l.split(';').map(s=>s.trim())).filter(a=>a[0]).map(a=>[a[0],a[1]||'1',a[2]||'un']);
+  if($('f_remota').value==='ETH'){L=L.filter(a=>!/chip|SIM\b|antena externa celular/i.test(a[0]));
+    L.push(['Terminal de satélite (Telespazio; 2ª opção Starlink) ou ponto de rede local','1','conj'],['Cabo de rede UTP Cat5e com conectores RJ45','10','m'],['Fonte de alimentação externa 90–240 VCA (5 VCC) da remota','1','un']);}
+  return L;
+}
+function memoText(r){
+  const raiz='√3';
+  let t='';
+  if(r.ponto==='BT'){
+    t+='Medição indireta em BT (trafo ≤ '+fmtKva(r.lim)+' kVA)\n';
+    t+='In = S / ('+raiz+' × V) = '+fmtKva(r.kva)+' kVA × 1000 / ('+raiz+' × '+r.vsec+' V) = '+fmt(r.inBT,1)+' A\n';
+    t+='TC escolhido: '+r.tc+'/5 A  →  RTC = '+r.tc+' / 5 = '+r.rtc+'\n';
+    t+='Sem TP (tensão aplicada direto ao medidor)  →  RTP = 1\n';
+  }else{
+    t+='Medição em MT (trafo > '+fmtKva(r.lim)+' kVA)\n';
+    t+='In = S / ('+raiz+' × V) = '+fmtKva(r.kva)+' kVA / ('+raiz+' × '+fmt(r.kv,1)+' kV) = '+fmt(r.inMT,2)+' A\n';
+    t+='TC escolhido: '+r.tc+'/5 A  →  RTC = '+r.rtc+'\n';
+    t+='TP: '+r.vp.toLocaleString('pt-BR')+'/115 V  →  RTP = '+r.vp.toLocaleString('pt-BR')+' / 115 ≈ '+r.rtp+'\n';
+  }
+  t+='Fator de multiplicação (constante) = RTC × RTP = '+r.rtc+' × '+r.rtp+' = '+r.fm+'\n';
+  t+='Carregamento do TC à potência nominal: '+fmt(r.carga,0)+'% do primário';
+  return t;
+}
+const escH=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let last=null;
+function render(){
+  renderLinks();
+  const r=calc(); last=r;
+  if(r.invalid){$('calc').innerHTML='<div style="grid-column:1/-1"><small>Aguardando</small><em>Informe a potência do trafo em kVA.</em></div>';
+    $('memo').textContent='';$('tEquip').innerHTML='';$('tMat').innerHTML='';$('warns').innerHTML='';$('btnPdf').disabled=true;return}
+  $('btnPdf').disabled=false;
+  $('pontoBadge').textContent='Medição em '+r.ponto;
+  $('calc').innerHTML=
+    '<div><small>Corrente nominal</small><b>'+fmt(r.in,r.ponto==='BT'?1:2)+' A</b><em>'+(r.ponto==='BT'?r.vsec+' V':fmt(r.kv,1)+' kV')+'</em></div>'+
+    '<div><small>TC</small><b>'+r.tc+'/5</b><em>RTC '+r.rtc+'</em></div>'+
+    '<div><small>TP</small><b>'+(r.ponto==='BT'?'—':r.vp.toLocaleString('pt-BR')+'/115')+'</b><em>RTP '+r.rtp+'</em></div>'+
+    '<div><small>Constante</small><b>'+r.fm+'</b><em>RTC × RTP</em></div>';
+  $('memo').textContent=memoText(r);
+  $('warns').innerHTML=r.warns.map(w=>'<div class="warnbox">'+escH(w)+'</div>').join('');
+  $('tEquip').innerHTML=equipamentos(r).map(e=>'<tr><td class="th">'+(photos[e[3]]?'<img alt="" src="'+photoUrl(e[3])+'">':'<span class="status">—</span>')+'</td><td><b>'+escH(e[0])+'</b></td><td>'+escH(e[1])+'</td><td class="q">'+e[2]+'</td></tr>').join('');
+  $('tMat').innerHTML=materiais(r).map(m=>'<tr><td>'+escH(m[0])+'</td><td class="q">'+escH(m[1])+'</td><td>'+escH(m[2])+'</td></tr>').join('');
+}
+
+/* ---------- PDF ---------- */
+async function gerarPdf(){
+  const r=last; if(!r||r.invalid)return;
+  const ps=$('pdfStatus'); ps.className='status'; ps.textContent='Gerando…';
+  try{
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'});
+    const W=210, M=14; const blue=[29,85,180], ink=[22,32,46], grey=[91,103,120];
+    doc.setFillColor(0,4,100); doc.rect(0,0,W,24,'F');
+    try{const lg=await toPng(document.querySelector('.blogo').src);doc.addImage(lg.data,'PNG',M,7.2,36,36*lg.h/lg.w);}catch(e){}
+    doc.setDrawColor(255,255,255); doc.setLineWidth(.2); doc.line(M+40,5,M+40,19);
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(12.5);
+    doc.text('Dimensionamento de Medição – '+($('f_tiposerv').value==='reativ'?'Reativação de UC':'Ligação Nova'),M+44,11);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    doc.text('Grupo A · Executiva de Perdas Sul e Sudoeste',M+44,17.5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('SS '+($('f_ss').value||'—'),W-M,11,{align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    doc.text('Emitido em '+new Date().toLocaleDateString('pt-BR'),W-M,17.5,{align:'right'});
+    let y=31;
+    const sec=t=>{doc.setTextColor(...blue);doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.text(t.toUpperCase(),M,y);y+=2;};
+    const tblOpts={theme:'grid',styles:{fontSize:8.8,cellPadding:1.8,textColor:ink,lineColor:[216,222,231],lineWidth:.2},headStyles:{fillColor:[230,238,251],textColor:ink,fontStyle:'bold'},margin:{left:M,right:M}};
+    sec('Dados da nota');
+    doc.autoTable(Object.assign({},tblOpts,{startY:y,body:[
+      ['Tipo de serviço',$('f_tiposerv').selectedOptions[0].text,'Data solic.',$('f_data').value],
+      ['Cliente',{content:$('f_cliente').value,colSpan:3}],
+      ['Endereço',{content:$('f_endereco').value,colSpan:3}],
+      ['Localidade',$('f_localidade').value,'Telefone',$('f_telefone').value],
+      ['Serviço',{content:$('f_servico').value,colSpan:3}],
+      ['Classe',{content:$('f_classe').value,colSpan:3}],
+      ['Atividade',{content:$('f_atividade').value,colSpan:3}],
+      ['Tipo ligação',$('f_tipolig').value,'Ramal',$('f_ramal').value],
+      ['Pot. trafo',fmtKva(r.kva)+' kVA','Tensões',fmt(r.kv,1)+' kV / '+$('f_vsec').selectedOptions[0].text],
+      ['Perfil',$('f_perfil').selectedOptions[0].text,'Ponto de medição',r.ponto==='BT'?'Indireta em BT':'Em MT (TC + TP) · '+$('f_inst').selectedOptions[0].text]
+    ],columnStyles:{0:{fontStyle:'bold',cellWidth:28,fillColor:[246,248,251]},2:{fontStyle:'bold',cellWidth:28,fillColor:[246,248,251]}}}));
+    y=doc.lastAutoTable.finalY+8;
+    const co=coords();
+    if(co){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(...blue);
+      doc.textWithLink('Localização: '+co[0].toFixed(6)+', '+co[1].toFixed(6)+'  ›  Abrir no Google Maps',M,y-2,{url:mapsUrl(co)});y+=6;}
+    if(existente.length){sec('Medição existente na nota');
+      doc.autoTable(Object.assign({},tblOpts,{startY:y,body:existente.map(([k,v])=>[k,v]),columnStyles:{0:{fontStyle:'bold',cellWidth:48,fillColor:[246,248,251]}}}));
+      y=doc.lastAutoTable.finalY+8;}
+    sec('Cálculo');
+    doc.autoTable(Object.assign({},tblOpts,{startY:y,head:[['Corrente nominal','TC','RTC','TP','RTP','Constante (RTC × RTP)']],
+      body:[[fmt(r.in,r.ponto==='BT'?1:2)+' A',r.tc+'/5 A',String(r.rtc),r.ponto==='BT'?'Não se aplica':r.vp.toLocaleString('pt-BR')+'/115 V',String(r.rtp),String(r.fm)]],
+      styles:Object.assign({},tblOpts.styles,{fontSize:10,halign:'center',fontStyle:'bold'})}));
+    y=doc.lastAutoTable.finalY+4;
+    doc.setFont('courier','normal'); doc.setFontSize(8.2); doc.setTextColor(...grey);
+    const memo=memoText(r).replace(/√3/g,'raiz(3)').replace(/[≤]/g,'<=').replace(/[≥]/g,'>=').replace(/[→]/g,'->').replace(/[≈]/g,'~').replace(/×/g,'x');
+    const ml=doc.splitTextToSize(memo,W-2*M); doc.text(ml,M,y+3); y+=ml.length*3.6+6;
+    if(r.warns.length){doc.setFont('helvetica','bold');doc.setTextColor(162,97,11);doc.setFontSize(8.8);
+      r.warns.forEach(w=>{const l=doc.splitTextToSize('Atenção: '+w,W-2*M);doc.text(l,M,y);y+=l.length*4+1});y+=3;}
+    sec('Equipamentos de medição');
+    doc.autoTable(Object.assign({},tblOpts,{startY:y,head:[['Item','Especificação','Qtd']],body:equipamentos(r).map(e=>e.slice(0,3)),columnStyles:{0:{cellWidth:52,fontStyle:'bold'},2:{cellWidth:14,halign:'right'}}}));
+    y=doc.lastAutoTable.finalY+8;
+    if(co){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(...blue);
+      doc.textWithLink('›  Verificar disponibilidade de sinal da remota no local (mapa de cobertura)',M,y-2,{url:covBase()+covHash(co)});y+=6;}
+    const comFoto=equipamentos(r).filter(e=>photos[e[3]]);
+    if(comFoto.length){
+      ps.textContent='Preparando fotos…';
+      const imgs=[];
+      for(const e of comFoto){try{imgs.push({e,img:await toJpeg(photoUrl(e[3]))})}catch(err){}}
+      if(imgs.length){
+        const cw=(W-2*M-2*6)/3, ch=cw*0.75;
+        if(y+ch+14>280){doc.addPage();y=20}
+        sec('Fotos dos equipamentos'); y+=3;
+        imgs.forEach((o,i)=>{
+          const col=i%3; if(col===0&&i>0){y+=ch+12; if(y+ch+12>280){doc.addPage();y=20}}
+          const x=M+col*(cw+6);
+          doc.setDrawColor(216,222,231); doc.rect(x,y,cw,ch);
+          const ar=o.img.w/o.img.h; let iw=cw-2, ih=iw/ar; if(ih>ch-2){ih=ch-2; iw=ih*ar}
+          doc.addImage(o.img.data,'JPEG',x+(cw-iw)/2,y+(ch-ih)/2,iw,ih);
+          doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...ink);
+          doc.text(doc.splitTextToSize(o.e[0],cw),x,y+ch+4);
+        });
+        y+=ch+14;
+      }
+    }
+    if(y>250){doc.addPage();y=20}
+    sec('Materiais complementares');
+    doc.autoTable(Object.assign({},tblOpts,{startY:y,head:[['Material','Qtd','Un']],body:materiais(r),columnStyles:{1:{cellWidth:16,halign:'right'},2:{cellWidth:14}}}));
+    y=doc.lastAutoTable.finalY+8;
+    const obs=$('f_obs').value.trim();
+    const notas=(obs?obs+'\n':'')+'Conferir o diâmetro da janela do TC com a bitola dos condutores do secundário do trafo (medição em BT). Quantidades de cabos e eletrodutos são estimativas padrão; ajustar conforme a distância trafo–caixa de medição.';
+    if(y>245){doc.addPage();y=20}
+    sec('Observações');y+=3;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...ink);
+    const ol=doc.splitTextToSize(notas,W-2*M);doc.text(ol,M,y);y+=ol.length*4.2+12;
+    if(y>270){doc.addPage();y=30}
+    doc.setDrawColor(...grey);doc.line(M,y,M+80,y);
+    doc.setFontSize(9);doc.text($('f_resp').value||'Responsável',M,y+5);
+    doc.setTextColor(...grey);doc.setFontSize(8);doc.text('Responsável pelo dimensionamento',M,y+9);
+    const n=doc.getNumberOfPages();
+    for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setTextColor(...grey);
+      doc.text('Dimensionamento gerado a partir da nota de serviço. Valores de referência; confirmar com a norma técnica vigente.',M,290);
+      doc.text(i+'/'+n,W-M,290,{align:'right'});}
+    const blob=doc.output('blob');
+    const name='Dimensionamento_'+($('f_tiposerv').value==='reativ'?'Reativacao':'LigNova')+'_SS_'+($('f_ss').value||'nota')+'.pdf';
+    const dl=await (window.claude&&window.claude.use?window.claude.use('downloads'):Promise.resolve(null));
+    if(!dl){
+      if(!(window.claude&&window.claude.use)){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);ps.className='status ok';ps.textContent='PDF salvo: '+name;return}
+      ps.className='status err';ps.textContent='O download não está disponível nesta visualização. Abra a página no claude.ai.';return}
+    await dl.save({filename:name,data:blob});
+    ps.className='status ok'; ps.textContent='PDF salvo: '+name;
+  }catch(e){
+    ps.className='status err';
+    ps.textContent=e&&e.code==='declined'?'Download cancelado.':e&&e.code==='rate_limited'?'Já existe um download aguardando confirmação.':'Não foi possível gerar o PDF ('+(e&&(e.message||e.code))+').';
+  }
+}
+
+/* ---------- fotos ---------- */
+const SLOTS=[['tcbt_200','TC janela 200/5'],['tcbt_400','TC janela 400/5'],['tcbt_800','TC janela 800/5'],
+  ['tcmt_h_15','TC externo · estrutura H · 15 kV (13,8)'],['tp_h_15','TP externo · estrutura H · 15 kV (13,8)'],
+  ['tcmt_h_36','TC externo · estrutura H · 36,2 kV (34,5)'],['tp_h_36','TP externo · estrutura H · 36,2 kV (34,5)'],
+  ['tcmt_cub_15','TC interno · cubículo GD · 15 kV (13,8)'],['tp_cub_15','TP interno · cubículo GD · 15 kV (13,8)'],
+  ['tcmt_cub_36','TC interno · cubículo GD · 36,2 kV (34,5)'],['tp_cub_36','TP interno · cubículo GD · 36,2 kV (34,5)'],['rem_MAX','Remota RS2000 Lite DS 4G Max'],['rem_CATM','Remota RS2000 Lite NB Cat-M'],['rem_ETH','Remota RS2000 Ultra Lite Ethernet'],['med_irrigante','Medidor · irrigante'],['med_industria','Medidor · indústria'],['blindada','Conjunto de medição blindada'],['chave','Chave de aferição']];
+let photos={}, dbRef=null, assetsNs=null, phReady=false, phTarget=null, phBusy=null;
+const EMBED=window.__EMBED_FOTOS__||{};
+const photoUrl=s=>EMBED[s]||('/_blob/'+photos[s]);
+function renderPhotos(){
+  const can=!!(dbRef&&assetsNs);
+  $('phGrid').innerHTML=SLOTS.map(([k,n])=>{
+    const has=!!photos[k];
+    return '<div class="ph'+(phBusy===k?' busy':'')+'"><div class="img">'+(has?'<img alt="Foto: '+escH(n)+'" src="'+photoUrl(k)+'">':(phReady?'Sem foto':'Carregando…'))+'</div>'+
+      '<div class="cap"><b>'+escH(n)+'</b><div class="row">'+
+      (can?'<button data-up="'+k+'"'+(phBusy?' disabled':'')+'>'+(has?'Trocar':'Enviar foto')+'</button>'+(has?'<button data-rm="'+k+'"'+(phBusy?' disabled':'')+'>Remover</button>':''):'')+
+      '</div></div></div>';
+  }).join('');
+}
+async function initPhotos(){
+  if(!(window.claude&&window.claude.use)&&Object.keys(EMBED).length){photos=Object.fromEntries(Object.keys(EMBED).map(k=>[k,k]));phReady=true;$('phHint').textContent=(window.__FOTOS_HINT__||'Fotos embutidas neste arquivo. Para trocar fotos, use a versão online da ferramenta.');renderPhotos();render();return}
+  renderPhotos();
+  const timer=setTimeout(()=>{if(!phReady){phReady=true;$('phHint').textContent='Não foi possível carregar as fotos nesta visualização. Abra a página no claude.ai para cadastrar e usar fotos.';renderPhotos()}},10000);
+  try{
+    const db=window.claude&&window.claude.use?await window.claude.use('db'):null;
+    assetsNs=window.claude&&window.claude.use?await window.claude.use('assets'):null;
+    if(!db){clearTimeout(timer);phReady=true;$('phHint').textContent='Fotos indisponíveis nesta visualização. Abra a página no claude.ai, com sua conta, para cadastrar e usar fotos.';renderPhotos();return}
+    dbRef=db.doc('config/fotos');
+    const snap=await dbRef.get(); clearTimeout(timer);
+    photos=(snap.exists&&snap.data())?Object.assign({},snap.data()):{};
+    phReady=true;
+    if(!assetsNs)$('phHint').textContent='Você pode ver as fotos cadastradas, mas não enviar novas nesta visualização.';
+    renderPhotos(); render();
+  }catch(e){clearTimeout(timer);phReady=true;$('phHint').textContent='Não foi possível carregar as fotos ('+(e.code||e.message)+').';renderPhotos()}
+}
+function shrink(file,max=1400){return new Promise((res,rej)=>{
+  const u=URL.createObjectURL(file); const im=new Image();
+  im.onload=()=>{const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');
+    c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+    URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('falha ao converter imagem')),'image/jpeg',.86)};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('arquivo de imagem inválido'))}; im.src=u;})}
+function toPng(url){return new Promise((res,rej)=>{const im=new Image();
+  im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);res({data:c.toDataURL('image/png'),w:c.width,h:c.height})};
+  im.onerror=()=>rej(new Error('logo não carregou')); im.src=url;})}
+function toJpeg(url){return new Promise((res,rej)=>{const im=new Image();
+  im.onload=()=>{const k=Math.min(1,900/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');
+    c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);const g=c.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+    res({data:c.toDataURL('image/jpeg',.85),w:c.width,h:c.height})};
+  im.onerror=()=>rej(new Error('foto não carregou')); im.src=url;})}
+async function savePhotos(){await dbRef.set(Object.assign({},photos))}
+async function uploadPhoto(slot,file){
+  phBusy=slot;renderPhotos();
+  try{
+    const blob=await shrink(file); const up=await assetsNs.upload(blob);
+    const old=photos[slot]; photos[slot]=up.id; await savePhotos();
+    if(old&&!Object.values(photos).includes(old)){try{await assetsNs.delete(old)}catch(e){}}
+    $('phHint').textContent='Foto salva: '+SLOTS.find(s=>s[0]===slot)[1]+'.';
+  }catch(e){$('phHint').textContent='A foto não foi salva ('+(e.code||e.message)+'). Tente outro arquivo.'}
+  phBusy=null;renderPhotos();render();
+}
+async function removePhoto(slot){
+  const old=photos[slot]; if(!old)return; phBusy=slot;renderPhotos();
+  try{delete photos[slot]; await savePhotos(); if(!Object.values(photos).includes(old)){try{await assetsNs.delete(old)}catch(e){}}
+    $('phHint').textContent='Foto removida.';}
+  catch(e){photos[slot]=old;$('phHint').textContent='Não foi possível remover ('+(e.code||e.message)+').'}
+  phBusy=null;renderPhotos();render();
+}
+$('phGrid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.up){phTarget=b.dataset.up;$('phFile').value='';$('phFile').click()}
+  if(b.dataset.rm)removePhoto(b.dataset.rm);});
+$('phFile').addEventListener('change',e=>{const f=e.target.files[0];if(f&&phTarget)uploadPhoto(phTarget,f)});
+
+/* ---------- eventos ---------- */
+loadCfg();
+Object.entries(EXAMPLE).forEach(([k,v])=>$(k).value=v);
+$('f_perfil').value='industria';
+document.addEventListener('input',e=>{if(e.target.id&&e.target.id.startsWith('c_'))saveCfg();render()});
+document.addEventListener('change',()=>render());
+$('file').addEventListener('change',e=>handleFile(e.target.files[0]));
+const dz=$('drop');
+['dragenter','dragover'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
+$('btnPdf').addEventListener('click',gerarPdf);
+$('btnNova').addEventListener('click',()=>{
+  ['f_ss','f_data','f_servico','f_cliente','f_endereco','f_localidade','f_telefone','f_classe','f_atividade','f_tipolig','f_ramal','f_kva','f_tforn','f_obs'].forEach(id=>$(id).value='');
+  $('f_kv').value='13.8';$('f_vsec').value='380';$('f_perfil').value='industria';$('f_ponto').value='auto';$('f_inst').value='h';
+  $('f_tiposerv').value='nova';existente=[];renderExist();$('f_lat').value='';$('f_lon').value='';$('f_remota').value='MAX';
+  $('file').value='';$('exBadge').hidden=true;$('pdfStatus').textContent='';
+  const st=$('status');st.className='status';st.textContent='Pronto para uma nova nota. Envie o PDF.';
+  render();window.scrollTo({top:0,behavior:'smooth'});dz.focus();
+});
+$('btnReset').addEventListener('click',()=>{CFG_KEYS.forEach(k=>$(k).value=DEFAULTS[k]);saveCfg();render()});
+render();
+initPhotos();
+})();
+</script>
+
+</body></html>
